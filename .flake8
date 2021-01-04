@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 120
+application-import-names = abeluna
+import-order-style = pycharm
+enable-extensions = G
+per-file-ignores =
+    # F401: unused imports, ignore in all __init__.py
+    # F403: import *
+    ./*/__init__.py:F401,F403
+    ./abeluna/main.py:E402,I100

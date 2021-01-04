@@ -1,0 +1,4 @@
+pygobject
+humanize
+icalendar
+caldav
