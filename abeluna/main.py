@@ -173,7 +173,7 @@ class Abeluna(Gtk.Application):
         try:
             builder.add_from_file(os.path.join(UI_LOCATION, 'menubar.ui'))
         except GLib.Error:
-            raise SystemExit(2)
+            self.quit()
 
         self.set_menubar(builder.get_object('menubar'))
 
@@ -193,7 +193,7 @@ def main():
     except KeyboardInterrupt:
         exit_code = 1
     server.stop_all()
-    sys.exit(exit_code)
+    return exit_code
 
 
 if __name__ == '__main__':
