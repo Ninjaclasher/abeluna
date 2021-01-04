@@ -9,7 +9,7 @@ setup(
     entry_points={
         'gui_scripts': [
             'abeluna = abeluna.main:main',
-        ]
+        ],
     },
     author='Evan Zhang',
     install_requires=['pygobject', 'humanize', 'icalendar', 'caldav'],

@@ -8,7 +8,7 @@ import os
 import sys
 
 import humanize
-from gi.repository import GLib, GObject, Gdk, Gio, Gtk, Notify
+from gi.repository import GLib, GObject, Gio, Gtk, Notify
 
 from abeluna.sync import server
 from abeluna.util import colour_text
