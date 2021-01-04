@@ -23,8 +23,8 @@ $ pip install abeluna
 $ abeluna
 ```
 
-### Arch Linux AUR
-There are plans to add Abeluna to the Arch Linux AUR, but it has not been added yet.
+### AUR
+There are plans to add Abeluna to the AUR, but it has not been added yet.
 
 ## Usage
 ```sh
