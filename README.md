@@ -1,4 +1,6 @@
-# Abeluna
+Abeluna [![Build Status](https://github.com/Ninjaclasher/abeluna/workflows/build/badge.svg)](https://github.com/Ninjaclasher/abeluna/actions/)
+=====
+
 A simple GUI to-do/task manager with CalDAV support. In theory, Abeluna should support any CalDAV server, but currently only [Nextcloud](https://apps.nextcloud.com/apps/tasks) and [Radicale](https://radicale.org/3.0.html) are tested.
 
 The goal of this application is to become a desktop version of Nextcloud's Tasks app. As such, not all functionality in the [icalendar's VTODO](https://icalendar.org/iCalendar-RFC-5545/3-6-2-to-do-component.html) are supported, only those that are used by Nextcloud. On the other hand, there some non-standard fields used by Nextcloud that are supported by Abeluna, such as the ability to hide subtasks.
