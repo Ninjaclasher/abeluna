@@ -1,5 +1,5 @@
 # Abeluna
-A simple GUI to-do/task manager with CalDAV support. In theory, Abeluna should support any CalDAV server, but currently only [Nextlcoud](https://apps.nextcloud.com/apps/tasks) and [https://radicale.org/3.0.html](Radicale) are tested.
+A simple GUI to-do/task manager with CalDAV support. In theory, Abeluna should support any CalDAV server, but currently only [Nextcloud](https://apps.nextcloud.com/apps/tasks) and [https://radicale.org/3.0.html](Radicale) are tested.
 
 ## Screenshots
 
