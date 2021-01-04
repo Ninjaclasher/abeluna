@@ -1,6 +1,8 @@
 # Abeluna
 A simple GUI to-do/task manager with CalDAV support. In theory, Abeluna should support any CalDAV server, but currently only [Nextcloud](https://apps.nextcloud.com/apps/tasks) and [https://radicale.org/3.0.html](Radicale) are tested.
 
+The goal of this application is to become a desktop version of Nextcloud's Tasks app. As such, not all functionality in the [icalendar's VTODO](https://icalendar.org/iCalendar-RFC-5545/3-6-2-to-do-component.html) are supported, only those that are used by Nextcloud. On the other hand, there some non-standard fields used by Nextcloud that are supported by Abeluna, such as the ability to hide subtasks.
+
 ## Screenshots
 
 ![Main window](https://i.imgur.com/8WP2OPj.png)
@@ -18,3 +20,18 @@ First, install two packages, `libnotify` and `gobject-introspection`. On other d
 $ pip install abeluna
 $ abeluna
 ```
+
+### Arch Linux AUR
+There are plans to add Abeluna to the Arch Linux AUR, but it has not been added yet.
+
+## Usage
+```sh
+$ abeluna
+```
+
+In the GUI, calendars can be added through `Settings > Calendar settings`. General settings, such as the timezone and synchronization schedule can be accessed through `Settings > General settings`.
+
+## Future Plans
+ - Support for desktop notifications.
+ - Support for recurring tasks.
+ - Add common keyboard shortcuts.
