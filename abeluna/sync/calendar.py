@@ -12,7 +12,10 @@ class Calendar:
         self.password = password
         self.local_storage = local_storage
 
-        self.local_server = LocalServer(self.local_storage, self.uid)
+        if self.uid and self.local_storage:
+            self.local_server = LocalServer(self.local_storage, self.uid)
+        else:
+            self.local_server = None
 
         if self.url:
             self.client = caldav.DAVClient(
