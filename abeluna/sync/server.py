@@ -141,11 +141,11 @@ class SynchronizationServer:
             return False, remote_copy_of_remote
         # Nothing changed server side, so use the client todo if there are any updates.
         elif local_copy_of_remote.to_ical() == remote_copy_of_remote.to_ical():
-            print(uid, 'was changed locally but not changed on remote. Pushing to remote...')
+            # print(uid, 'was changed locally but not changed on remote. Pushing to remote...')
             return True, local_copy_of_local
         # Something changed server side and client side, so we will prioritize the server.
         elif local_copy_of_remote.to_ical() != remote_copy_of_remote.to_ical():
-            print(uid, 'was changed both locally and on remote. Merging...')
+            # print(uid, 'was changed both locally and on remote. Merging...')
 
             # User prioritizes server.
             for key, value in local_copy_of_local.items():
@@ -208,7 +208,7 @@ class SynchronizationServer:
                             try:
                                 local_item = local_todos[local_todos.index(uid)]
                             except ValueError:
-                                print(uid, 'does not exist locally. Creating...')
+                                # print(uid, 'does not exist locally. Creating...')
                                 # Item exists on the server but does not exist locally AND was not deleted locally.
                                 has_todo_component = True
                                 new_cal.add_component(remote_item)
@@ -216,7 +216,7 @@ class SynchronizationServer:
                             else:
                                 # Item exists on the server but does not exist locally AND was deleted locally.
                                 if local_item.local_vtodo is None:
-                                    print(uid, 'was deleted locally. Deleting from server...')
+                                    # print(uid, 'was deleted locally. Deleting from server...')
                                     updated_todo_component = True
                                     cal.local_server.delete_todo_from_server(remote_item)
                                 # Item exists on both the server and the client, compare the todos
@@ -247,11 +247,11 @@ class SynchronizationServer:
                         # Item has a record of being on the server, but it doesn't exist on the server anymore.
                         # We can only assume it was deleted server-side.
                         if local_item.remote_vtodo is not None:
-                            print(local_item.uid, 'was deleted on remote. Deleting locally...')
+                            # print(local_item.uid, 'was deleted on remote. Deleting locally...')
                             cal.local_server.delete_todo_from_server(local_item.local_vtodo)
                         # Item exists on client, has never existed on server, so create and push to the server.
                         else:
-                            print(local_item.uid, 'was created locally. Pushing to remote...')
+                            # print(local_item.uid, 'was created locally. Pushing to remote...')
                             vcal = icalendar.Calendar()
                             vcal.add('VERSION', '2.0')
                             vcal.add('PRODID', '-//Abeluna//NONSGML v1.0//EN')
