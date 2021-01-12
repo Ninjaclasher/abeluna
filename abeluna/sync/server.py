@@ -248,7 +248,7 @@ class SynchronizationServer:
                         # We can only assume it was deleted server-side.
                         if local_item.remote_vtodo is not None:
                             # print(local_item.uid, 'was deleted on remote. Deleting locally...')
-                            cal.local_server.delete_todo_from_server(local_item.local_vtodo)
+                            cal.local_server.delete_todo_from_server(local_item.remote_vtodo)
                         # Item exists on client, has never existed on server, so create and push to the server.
                         else:
                             # print(local_item.uid, 'was created locally. Pushing to remote...')
