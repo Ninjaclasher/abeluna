@@ -231,7 +231,7 @@ class Todo:
         _now = self.now(aware=False)
 
         def _time_or_date_display(dt):
-            if not self.all_day and abs(_now - dt) < datetime.timedelta(days=180):
+            if not self.all_day and abs(_now - dt) < datetime.timedelta(days=30):
                 return humanize.naturaltime(dt)
             else:
                 return humanize.naturaldate(dt)
@@ -257,12 +257,9 @@ class Todo:
 
         _start = _convert_datetime(self.start_date)
         _end = _convert_datetime(self.end_date)
-        if _start is not None and _end is None:
-            if _start > _now:
-                return 'Starts {}'.format(_time_or_date_display(_start))
-            else:
-                return ''
-        else:
+        if _start is not None and _start > _now:
+            return 'Starts {}'.format(_time_or_date_display(_start))
+        elif _end is not None:
             if _end < _now:
                 return colour_text(
                     '<b>Ended {}</b>'.format(_time_or_date_display(_end)),
@@ -273,6 +270,7 @@ class Todo:
                     'Ends {}'.format(_time_or_date_display(_end)),
                     'orange',
                 )
+        return ''
 
     @property
     def sort_value(self):
