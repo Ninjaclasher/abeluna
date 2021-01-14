@@ -332,27 +332,41 @@ class SettingsWindow(Gtk.Window):
         self.scrollable_server_view.set_propagate_natural_width(True)
         self.scrollable_server_view.set_shadow_type(type=Gtk.ShadowType.ETCHED_OUT)
         self.scrollable_server_view.add(self.server_view)
-        self.servers_page_grid.attach(self.scrollable_server_view, 0, 0, 6, 6)
+        self.servers_page_grid.attach(self.scrollable_server_view, 0, 0, 8, 6)
 
         self.server_add_button = Gtk.Button(label='Add')
+        self.server_clone_button = Gtk.Button(label='Clone')
         self.server_edit_button = Gtk.Button(label='Modify')
         self.server_delete_button = Gtk.Button(label='Delete')
 
+        self.server_clone_button.set_sensitive(False)
         self.server_edit_button.set_sensitive(False)
         self.server_delete_button.set_sensitive(False)
 
         def on_todo_tree_selection_changed(todo_tree_selection):
             current_it = todo_tree_selection.get_selected()[1]
             if current_it is None:
+                self.server_clone_button.set_sensitive(False)
                 self.server_edit_button.set_sensitive(False)
                 self.server_delete_button.set_sensitive(False)
             else:
+                self.server_clone_button.set_sensitive(True)
                 self.server_edit_button.set_sensitive(True)
                 self.server_delete_button.set_sensitive(True)
         self.server_view.get_selection().connect('changed', on_todo_tree_selection_changed)
 
-        def on_server_add(button):
-            self.server_editor.set_data({})
+        def on_server_create(button, clone_selected):
+            if clone_selected:
+                it = self.server_view.get_selection().get_selected()[1]
+                if it is None:
+                    return
+                uid = self.server_todo_store[it][3]
+                data = settings.CALENDARS[uid].copy()
+                data.pop('uid')
+            else:
+                data = {}
+
+            self.server_editor.set_data(data)
             rect = Gdk.Rectangle()
             rect.width = button.get_allocation().width
             rect.height = button.get_allocation().height
@@ -362,7 +376,8 @@ class SettingsWindow(Gtk.Window):
             self.server_editor_popover.set_position(Gtk.PositionType.TOP)
             self.server_editor_popover.show_all()
             self.server_editor_popover.popup()
-        self.server_add_button.connect('clicked', on_server_add)
+        self.server_add_button.connect('clicked', on_server_create, False)
+        self.server_clone_button.connect('clicked', on_server_create, True)
 
         def on_server_edit(button):
             it = self.server_view.get_selection().get_selected()[1]
@@ -387,7 +402,10 @@ class SettingsWindow(Gtk.Window):
             self.server_add_button, self.scrollable_server_view, Gtk.PositionType.BOTTOM, 2, 1,
         )
         self.servers_page_grid.attach_next_to(
-            self.server_edit_button, self.server_add_button, Gtk.PositionType.RIGHT, 2, 1,
+            self.server_clone_button, self.server_add_button, Gtk.PositionType.RIGHT, 2, 1,
+        )
+        self.servers_page_grid.attach_next_to(
+            self.server_edit_button, self.server_clone_button, Gtk.PositionType.RIGHT, 2, 1,
         )
         self.servers_page_grid.attach_next_to(
             self.server_delete_button, self.server_edit_button, Gtk.PositionType.RIGHT, 2, 1,
