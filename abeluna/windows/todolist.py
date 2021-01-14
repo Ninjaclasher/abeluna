@@ -52,6 +52,7 @@ class Todo:
     ]
 
     DO_NOT_TRACK = ('last_modified_date', 'sequence', 'completed_date', 'dtstamp', 'created_date')
+    DO_NOT_LOAD = ('uid', 'sequence', 'created_date', 'dtstamp', 'last_modified_date', 'hide_subtasks')
 
     UTC_DATE_FIELDS = ('created_date', 'completed_date', 'dtstamp', 'last_modified_date')
     LOCAL_DATE_FIELDS = ('start_date', 'end_date')
@@ -78,7 +79,7 @@ class Todo:
     )
 
     @classmethod
-    def load_from_vtodo(cls, vtodo):
+    def load_from_vtodo(cls, vtodo, load_all=True):
         kwargs = {}
 
         def _sanitize(val):
@@ -101,6 +102,8 @@ class Todo:
             return dt.astimezone(pytz.timezone(settings.TIMEZONE))
 
         for field_model, field_vtodo in cls.VTODO_MAPPING:
+            if not load_all and field_model in cls.DO_NOT_LOAD:
+                continue
             try:
                 val = vtodo[field_vtodo]
             except KeyError:
@@ -163,7 +166,7 @@ class Todo:
 
         if self.vtodo is None:
             self.vtodo = icalendar.Todo()
-            self.update_vtodo()
+        self.update_vtodo()
 
         def on_complete():
             if self.completed_date is not None and not self.completed:
@@ -651,6 +654,15 @@ class TodoListWindow(Gtk.Grid):
         button_delete.connect('clicked', on_todo_delete)
         self.popover_grid.add(button_delete)
 
+        button_clone_subtask = Gtk.Button(label='Clone')
+        button_clone_subtask.set_image(Gtk.Image.new_from_icon_name('edit-copy-symbolic', 4))
+        button_clone_subtask.set_always_show_image(True)
+
+        def on_clone_subtask(obj):
+            self.clone_todo(attached_uid=self.popover._attached_uid)
+        button_clone_subtask.connect('clicked', on_clone_subtask)
+        self.popover_grid.add(button_clone_subtask)
+
         button_add_subtask = Gtk.Button(label='Add subtask')
         button_add_subtask.set_image(Gtk.Image.new_from_icon_name('list-add-symbolic', 4))
         button_add_subtask.set_always_show_image(True)
@@ -726,12 +738,15 @@ class TodoListWindow(Gtk.Grid):
             ],
         )
 
-    def new_todo(self, parent_uid=None):
+    def new_todo(self, parent_uid=None, new_todo=None):
         if self._current_calendar is None:
             return
 
+        if new_todo is None:
+            new_todo = Todo(related_to=parent_uid)
+
         parent_it = self.todo_uid_to_iter.get(parent_uid, None)
-        new_todo = self.data[new_todo.uid] = Todo(related_to=parent_uid)
+        self.data[new_todo.uid] = new_todo
         todo_it = self.todo_uid_to_iter[new_todo.uid] = self.attach_todo(parent_it, new_todo.uid)
 
         server.update_todo(new_todo.vtodo, self._current_calendar)
@@ -740,6 +755,15 @@ class TodoListWindow(Gtk.Grid):
         path = self.sorted_store.convert_child_path_to_path(self.store.get_path(todo_it))
         self.tree_view.expand_to_path(path)
         self.tree_view.set_cursor(path, None, False)
+
+    def clone_todo(self, attached_uid=None):
+        try:
+            data = self.data[attached_uid]
+        except KeyError:
+            return
+
+        cloned_todo = Todo.load_from_vtodo(icalendar.Todo.from_ical(data.vtodo.to_ical()), load_all=False)
+        self.new_todo(cloned_todo.related_to, new_todo=cloned_todo)
 
     def connect_todo(self, todo):
         path = self.store.get_path(self.todo_uid_to_iter[todo.uid])
