@@ -356,12 +356,10 @@ class TodoEditor(Gtk.Grid):
         if date is None:
             return 'Unset'
         else:
-            time = '{hour}:{minute:02}'.format(hour=date.hour, minute=date.minute)
-            day = '{year}/{month:02}/{day:02}'.format(year=date.year, month=date.month, day=date.day)
             if widget.get_date_only():
-                return day
+                return date.strftime('%b %d, %Y')
             else:
-                return '{day} {time}'.format(day=day, time=time)
+                return date.strftime('%b %d, %Y %H:%M')
 
     def update_datepicker_labels(self):
         self.startdate_button.set_label(self._get_label(self.startdate_picker))
