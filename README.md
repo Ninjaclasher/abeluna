@@ -24,7 +24,7 @@ $ abeluna
 ```
 
 ### AUR
-There are plans to add Abeluna to the AUR, but it has not been added yet.
+If you are using Arch Linux and do not wish to install through PIP, you can install the AUR package [abeluna](https://aur.archlinux.org/packages/abeluna/) for the latest version.
 
 ## Usage
 ```sh
