@@ -14,7 +14,7 @@ class DateTimePickerWidget(Gtk.Grid):
     }
 
     def __init__(self, *args, **kwargs):
-        self.date_only = kwargs.pop('date_only', True)
+        self.visible_parts = kwargs.pop('components', 'ALL')
         selected_date = kwargs.pop('selected_date', None)
         self._tz = kwargs.pop('timezone', None)
 
@@ -26,7 +26,7 @@ class DateTimePickerWidget(Gtk.Grid):
         self._create_widgets()
 
         self.set_selected_date(selected_date)
-        self.set_date_only(self.date_only)
+        self.set_visible_parts(self.visible_parts)
 
     @property
     def now(self):
@@ -39,20 +39,33 @@ class DateTimePickerWidget(Gtk.Grid):
         return pytz.timezone(settings.TIMEZONE)
 
     def get_date_only(self):
-        return self.date_only
+        return self.visible_parts == 'DATE'
 
     def set_date_only(self, date_only):
-        self.date_only = date_only
+        self.set_visible_parts('DATE' if date_only else 'ALL')
+
+    def get_time_only(self):
+        return self.visible_parts == 'TIME'
+
+    def set_time_only(self, time_only):
+        self.set_visible_parts('TIME' if time_only else 'ALL')
+
+    def get_visible_parts(self):
+        return self.visible_parts
+
+    def set_visible_parts(self, visible_parts):
+        self.visible_parts = visible_parts
         for child in self.get_children():
             self.remove(child)
 
-        if not self.date_only:
+        if self.visible_parts in ('ALL', 'TIME'):
             self.attach(self.hour_selector, 0, 0, 2, 3)
             self.attach_next_to(self.time_colon, self.hour_selector, Gtk.PositionType.RIGHT, 1, 3)
             self.attach_next_to(self.minute_selector, self.time_colon, Gtk.PositionType.RIGHT, 2, 3)
-        self.attach(self.year_selector, 6, 0, 3, 1)
-        self.attach_next_to(self.month_selector, self.year_selector, Gtk.PositionType.BOTTOM, 3, 1)
-        self.attach_next_to(self.day_selector, self.month_selector, Gtk.PositionType.BOTTOM, 3, 1)
+        if self.visible_parts in ('ALL', 'DATE'):
+            self.attach(self.year_selector, 6, 0, 3, 1)
+            self.attach_next_to(self.month_selector, self.year_selector, Gtk.PositionType.BOTTOM, 3, 1)
+            self.attach_next_to(self.day_selector, self.month_selector, Gtk.PositionType.BOTTOM, 3, 1)
 
         self.attach(self.set_button, 7, 4, 2, 1)
 
