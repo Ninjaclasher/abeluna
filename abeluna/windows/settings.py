@@ -1,9 +1,11 @@
+import datetime
+
 import pytz
 from gi.repository import GObject, Gdk, Gtk
 
 from abeluna.settings import settings
 from abeluna.sync import Calendar, server
-from abeluna.widgets import DropdownSelectWidget, ErrorDialog
+from abeluna.widgets import DateTimePickerWidget, DropdownSelectWidget, ErrorDialog
 
 
 class CalendarEditor(Gtk.Grid):
@@ -197,6 +199,41 @@ class SettingsWindow(Gtk.Window):
             1,
         )
 
+        self.all_day_due_time_label = Gtk.Label('All day tasks due time')
+        self.all_day_due_time_popover = Gtk.Popover()
+        self.all_day_due_time_picker = DateTimePickerWidget(
+            visible_parts='TIME',
+            selected_date=datetime.datetime.strptime(settings.ALL_DAY_DUE_TIME, '%H:%M'),
+        )
+        self.all_day_due_time_popover.add(self.all_day_due_time_picker)
+        self.all_day_due_time_button = Gtk.Button(label=str(self.all_day_due_time_picker))
+
+        def on_clicked_all_day_due_time(obj):
+            self.all_day_due_time_popover.set_relative_to(self.all_day_due_time_button)
+            self.all_day_due_time_popover.show_all()
+            self.all_day_due_time_popover.popup()
+        self.all_day_due_time_button.connect('clicked', on_clicked_all_day_due_time)
+
+        def on_update_all_day_due_time(obj):
+            self.all_day_due_time_popover.popdown()
+            self.all_day_due_time_button.set_label(str(self.all_day_due_time_picker))
+        self.all_day_due_time_picker.connect('updated-date', on_update_all_day_due_time)
+
+        self.general_page_grid.attach_next_to(
+            self.all_day_due_time_label,
+            self.hide_completed_label,
+            Gtk.PositionType.BOTTOM,
+            2,
+            1,
+        )
+        self.general_page_grid.attach_next_to(
+            self.all_day_due_time_button,
+            self.all_day_due_time_label,
+            Gtk.PositionType.RIGHT,
+            4,
+            1,
+        )
+
         self.saved_label = Gtk.Label(label=' ')
         self.saved_label.set_xalign(0.95)
         self.saved_label.set_yalign(0.75)
@@ -210,6 +247,7 @@ class SettingsWindow(Gtk.Window):
             autosync_interval = self.autosync_selector.get_active_id()
             priority = self.priority_selector.get_active_id()
             hide_completed = str(int(self.hide_completed_selector.get_active()))
+            all_day_due_time = self.all_day_due_time_picker.get_selected_date().strftime('%H:%M')
 
             failed_settings = []
             for obj, name in (
@@ -217,6 +255,7 @@ class SettingsWindow(Gtk.Window):
                 (autosync_interval, 'autosync interval'),
                 (priority, 'priority'),
                 (hide_completed, 'hidden completed tasks'),
+                (all_day_due_time, 'all day due time'),
             ):
                 if obj is None:
                     failed_settings.append(name)
@@ -234,6 +273,9 @@ class SettingsWindow(Gtk.Window):
                 if settings.HIDE_COMPLETED != hide_completed:
                     settings.HIDE_COMPLETED = hide_completed
                     rebuild_todolist = True
+                if settings.ALL_DAY_DUE_TIME != all_day_due_time:
+                    settings.ALL_DAY_DUE_TIME = all_day_due_time
+                    rebuild_todolist = True
                 if settings.AUTOSYNC_INTERVAL != autosync_interval:
                     settings.AUTOSYNC_INTERVAL = autosync_interval
                     server.restart_autosync_thread()
@@ -250,7 +292,7 @@ class SettingsWindow(Gtk.Window):
         self.save_button.set_margin_top(20)
         self.save_button.connect('clicked', save_button_clicked)
 
-        self.general_page_grid.attach(self.save_button, 4, 5, 2, 1)
+        self.general_page_grid.attach(self.save_button, 4, 6, 2, 1)
         self.general_page_grid.attach_next_to(self.saved_label, self.save_button, Gtk.PositionType.LEFT, 2, 1)
 
         padding = Gtk.Box()

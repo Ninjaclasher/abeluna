@@ -21,6 +21,7 @@ class Settings:
         'SAVE_INTERVAL': '1',  # seconds
         'PRIORITIZE_ON_CONFLICT': 'SERVER',
         'HIDE_COMPLETED': '0',
+        'ALL_DAY_DUE_TIME': '00:00',
     }
     VALID_GENERAL_CONFIG_VALUES = {
         'TIMEZONE': pytz.all_timezones,
@@ -30,6 +31,7 @@ class Settings:
         'SAVE_INTERVAL': nonnegative_integer_validator,
         'PRIORITIZE_ON_CONFLICT': ['SERVER', 'CLIENT'],
         'HIDE_COMPLETED': ['0', '1'],
+        'ALL_DAY_DUE_TIME': ['{:02}:{:02}'.format(x, y) for x in range(24) for y in range(60)],
     }
 
     def __init__(self):

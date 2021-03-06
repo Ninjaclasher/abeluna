@@ -14,7 +14,7 @@ class DateTimePickerWidget(Gtk.Grid):
     }
 
     def __init__(self, *args, **kwargs):
-        self.visible_parts = kwargs.pop('components', 'ALL')
+        self.visible_parts = kwargs.pop('visible_parts', 'ALL')
         selected_date = kwargs.pop('selected_date', None)
         self._tz = kwargs.pop('timezone', None)
 
@@ -28,6 +28,18 @@ class DateTimePickerWidget(Gtk.Grid):
         self.set_selected_date(selected_date)
         self.set_visible_parts(self.visible_parts)
 
+    def __str__(self):
+        date = self.get_selected_date()
+        if date is None:
+            return 'Unset'
+        else:
+            if self.visible_parts == 'DATE':
+                return date.strftime('%b %d, %Y')
+            elif self.visible_parts == 'TIME':
+                return date.strftime('%H:%M')
+            else:
+                return date.strftime('%b %d, %Y %H:%M')
+
     @property
     def now(self):
         return datetime.datetime.now(tz=self.tz) + datetime.timedelta(minutes=1)
@@ -36,6 +48,8 @@ class DateTimePickerWidget(Gtk.Grid):
     def tz(self):
         if self._tz is not None:
             return self._tz
+        if self.get_time_only():
+            return None
         return pytz.timezone(settings.TIMEZONE)
 
     def get_date_only(self):
@@ -164,13 +178,15 @@ class DateTimePickerWidget(Gtk.Grid):
         self.set_button = Gtk.Button(label='Set!')
 
         def on_set_button_clicked(button):
-            self.selected_date = datetime.datetime(
-                year=self.year_selector.get_value_as_int(),
-                month=int(self.month_selector.get_active_id()),
-                day=self.day_selector.get_value_as_int(),
-                hour=self.hour_selector.get_value_as_int(),
-                minute=self.minute_selector.get_value_as_int(),
-            ).astimezone(tz=self.tz)
+            self.set_selected_date(
+                datetime.datetime(
+                    year=self.year_selector.get_value_as_int(),
+                    month=int(self.month_selector.get_active_id()),
+                    day=self.day_selector.get_value_as_int(),
+                    hour=self.hour_selector.get_value_as_int(),
+                    minute=self.minute_selector.get_value_as_int(),
+                ),
+            )
             self.emit('updated-date')
         self.set_button.connect('clicked', on_set_button_clicked)
         self.set_button.set_margin_top(20)

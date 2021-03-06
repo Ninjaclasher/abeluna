@@ -234,7 +234,7 @@ class Todo:
         _now = self.now(aware=False)
 
         def _time_or_date_display(dt):
-            if not self.all_day and abs(_now - dt) < datetime.timedelta(days=30):
+            if abs(_now - dt) < datetime.timedelta(days=30):
                 return humanize.naturaltime(dt)
             else:
                 return humanize.naturaldate(dt)
@@ -263,6 +263,12 @@ class Todo:
         if _start is not None and _start > _now:
             return 'Starts {}'.format(_time_or_date_display(_start))
         elif _end is not None:
+            if self.all_day and abs(_now - _end) < datetime.timedelta(days=1):
+                _end = datetime.datetime.combine(
+                    date=_end.date(),
+                    time=datetime.datetime.strptime(settings.ALL_DAY_DUE_TIME, '%H:%M').time(),
+                )
+
             if _end < _now:
                 return colour_text(
                     '<b>Ended {}</b>'.format(_time_or_date_display(_end)),
@@ -354,19 +360,9 @@ class TodoEditor(Gtk.Grid):
         self.description_view.get_buffer().set_text(_data['description'])
         self.update_datepicker_labels()
 
-    def _get_label(self, widget):
-        date = widget.get_selected_date()
-        if date is None:
-            return 'Unset'
-        else:
-            if widget.get_date_only():
-                return date.strftime('%b %d, %Y')
-            else:
-                return date.strftime('%b %d, %Y %H:%M')
-
     def update_datepicker_labels(self):
-        self.startdate_button.set_label(self._get_label(self.startdate_picker))
-        self.enddate_button.set_label(self._get_label(self.enddate_picker))
+        self.startdate_button.set_label(str(self.startdate_picker))
+        self.enddate_button.set_label(str(self.enddate_picker))
 
     def _create_widgets(self):
         self.summary_label = Gtk.Entry()
@@ -384,7 +380,7 @@ class TodoEditor(Gtk.Grid):
         self.startdate_picker = DateTimePickerWidget()
         self.startdate_popover.add(self.startdate_picker)
 
-        self.startdate_button = Gtk.Button(label=self._get_label(self.startdate_picker))
+        self.startdate_button = Gtk.Button(label=str(self.startdate_picker))
 
         def on_clicked_startdate(obj):
             self.startdate_picker.set_selected_date(self.data['start_date'])
@@ -419,7 +415,7 @@ class TodoEditor(Gtk.Grid):
         self.enddate_picker = DateTimePickerWidget()
         self.enddate_popover.add(self.enddate_picker)
 
-        self.enddate_button = Gtk.Button(label=self._get_label(self.enddate_picker))
+        self.enddate_button = Gtk.Button(label=str(self.enddate_picker))
 
         def on_clicked_enddate(obj):
             self.enddate_picker.set_selected_date(self.data['end_date'])
