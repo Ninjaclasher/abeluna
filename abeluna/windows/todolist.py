@@ -696,7 +696,10 @@ class TodoListWindow(Gtk.Grid):
             adjacency_list = defaultdict(list)
 
             for vtodo in server.todolist[self._current_calendar]:
-                self.data[str(vtodo['UID'])] = Todo.load_from_vtodo(vtodo)
+                todo = Todo.load_from_vtodo(vtodo)
+                if todo.completed and int(settings.HIDE_COMPLETED):
+                    continue
+                self.data[str(vtodo['UID'])] = todo
 
             for todo in self.data.values():
                 parent = todo['related_to']

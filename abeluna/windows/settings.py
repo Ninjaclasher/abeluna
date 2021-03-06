@@ -179,6 +179,24 @@ class SettingsWindow(Gtk.Window):
         self.general_page_grid.attach_next_to(self.priority_label, self.autosync_label, Gtk.PositionType.BOTTOM, 2, 1)
         self.general_page_grid.attach_next_to(self.priority_selector, self.priority_label, Gtk.PositionType.RIGHT, 4, 1)
 
+        self.hide_completed_label = Gtk.Label(label='Hide completed tasks')
+        self.hide_completed_selector = Gtk.CheckButton()
+        self.hide_completed_selector.set_active(int(settings.HIDE_COMPLETED))
+        self.general_page_grid.attach_next_to(
+            self.hide_completed_label,
+            self.priority_label,
+            Gtk.PositionType.BOTTOM,
+            2,
+            1,
+        )
+        self.general_page_grid.attach_next_to(
+            self.hide_completed_selector,
+            self.hide_completed_label,
+            Gtk.PositionType.RIGHT,
+            4,
+            1,
+        )
+
         self.saved_label = Gtk.Label(label=' ')
         self.saved_label.set_xalign(0.95)
         self.saved_label.set_yalign(0.75)
@@ -191,12 +209,14 @@ class SettingsWindow(Gtk.Window):
             timezone = self.timezone_combo.get_active_id()
             autosync_interval = self.autosync_selector.get_active_id()
             priority = self.priority_selector.get_active_id()
+            hide_completed = str(int(self.hide_completed_selector.get_active()))
 
             failed_settings = []
             for obj, name in (
                 (timezone, 'timezone'),
                 (autosync_interval, 'autosync interval'),
                 (priority, 'priority'),
+                (hide_completed, 'hidden completed tasks'),
             ):
                 if obj is None:
                     failed_settings.append(name)
@@ -207,14 +227,22 @@ class SettingsWindow(Gtk.Window):
                     'Setting for {} is invalid. Please try again.'.format(', '.join(failed_settings)),
                 ).run_and_wait()
             else:
+                rebuild_todolist = False
                 if settings.TIMEZONE != timezone:
                     settings.TIMEZONE = timezone
-                    self.parent.todolist_window.rebuild_todolist()
+                    rebuild_todolist = True
+                if settings.HIDE_COMPLETED != hide_completed:
+                    settings.HIDE_COMPLETED = hide_completed
+                    rebuild_todolist = True
                 if settings.AUTOSYNC_INTERVAL != autosync_interval:
                     settings.AUTOSYNC_INTERVAL = autosync_interval
                     server.restart_autosync_thread()
                 settings.PRIORITIZE_ON_CONFLICT = priority
                 settings.commit()
+
+                if rebuild_todolist:
+                    self.parent.todolist_window.rebuild_todolist()
+
                 self.saved_label.set_label('Saved!')
                 GObject.timeout_add_seconds(5, clear_saved_label)
 
@@ -222,7 +250,7 @@ class SettingsWindow(Gtk.Window):
         self.save_button.set_margin_top(20)
         self.save_button.connect('clicked', save_button_clicked)
 
-        self.general_page_grid.attach(self.save_button, 4, 4, 2, 1)
+        self.general_page_grid.attach(self.save_button, 4, 5, 2, 1)
         self.general_page_grid.attach_next_to(self.saved_label, self.save_button, Gtk.PositionType.LEFT, 2, 1)
 
         padding = Gtk.Box()

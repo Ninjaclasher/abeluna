@@ -21,6 +21,7 @@ class Settings:
         'AUTOSYNC_INTERVAL': '600',  # seconds
         'SAVE_INTERVAL': '1',  # seconds
         'PRIORITIZE_ON_CONFLICT': 'SERVER',
+        'HIDE_COMPLETED': '0',
     }
     VALID_GENERAL_CONFIG_VALUES = {
         'TIMEZONE': pytz.all_timezones,
@@ -29,6 +30,7 @@ class Settings:
         ],
         'SAVE_INTERVAL': nonnegative_integer_validator,
         'PRIORITIZE_ON_CONFLICT': ['SERVER', 'CLIENT'],
+        'HIDE_COMPLETED': ['0', '1'],
     }
 
     def __init__(self):
