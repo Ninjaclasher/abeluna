@@ -9,8 +9,7 @@ from gi.repository import GLib
 
 def nonnegative_integer_validator(val):
     try:
-        int(val)
-        assert val >= 0
+        assert int(val) >= 0
     except (ValueError, AssertionError):
         return False
 
