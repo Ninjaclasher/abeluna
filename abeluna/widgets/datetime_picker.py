@@ -72,16 +72,19 @@ class DateTimePickerWidget(Gtk.Grid):
         for child in self.get_children():
             self.remove(child)
 
+        _set_button_x = 0
         if self.visible_parts in ('ALL', 'TIME'):
+            _set_button_x = 3
             self.attach(self.hour_selector, 0, 0, 2, 3)
             self.attach_next_to(self.time_colon, self.hour_selector, Gtk.PositionType.RIGHT, 1, 3)
             self.attach_next_to(self.minute_selector, self.time_colon, Gtk.PositionType.RIGHT, 2, 3)
         if self.visible_parts in ('ALL', 'DATE'):
+            _set_button_x = 7
             self.attach(self.year_selector, 6, 0, 3, 1)
             self.attach_next_to(self.month_selector, self.year_selector, Gtk.PositionType.BOTTOM, 3, 1)
             self.attach_next_to(self.day_selector, self.month_selector, Gtk.PositionType.BOTTOM, 3, 1)
 
-        self.attach(self.set_button, 7, 4, 2, 1)
+        self.attach(self.set_button, _set_button_x, 4, 2, 1)
 
         # self.emit('updated-date')
 
