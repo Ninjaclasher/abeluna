@@ -256,7 +256,9 @@ class SynchronizationServer:
                             vcal.add('VERSION', '2.0')
                             vcal.add('PRODID', '-//Abeluna//NONSGML v1.0//EN')
                             vcal.add('CALSCALE', 'GREGORIAN')
-                            vcal.add_component(generate_vtimezone())
+                            vtimezone = generate_vtimezone()
+                            if vtimezone is not None:
+                                vcal.add_component(vtimezone)
                             vcal.add_component(local_item.local_vtodo)
                             caldav.Todo(cal.client, data=vcal, parent=cal.calendar, id=local_item.uid).save()
                             cal.local_server.update_todo_from_server(local_item.local_vtodo)
