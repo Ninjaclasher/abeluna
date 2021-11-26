@@ -231,18 +231,18 @@ class Todo:
 
     @property
     def time_display(self):
-        _now = self.now(aware=False)
-
-        def _time_or_date_display(dt):
-            if abs(_now - dt) < datetime.timedelta(days=30):
-                return humanize.naturaltime(dt)
-            else:
-                return humanize.naturaldate(dt)
-
         def _convert_datetime(dt):
             if dt is None:
                 return None
             return dt.astimezone(pytz.timezone(settings.TIMEZONE)).replace(tzinfo=None)
+
+        _now = _convert_datetime(self.now(aware=True))
+
+        def _time_or_date_display(dt):
+            if abs(_now - dt) < datetime.timedelta(days=30):
+                return humanize.naturaltime(dt, when=_now)
+            else:
+                return humanize.naturaldate(dt)
 
         if self.completed:
             if self.completed_date is None:

@@ -188,6 +188,7 @@ class DateTimePickerWidget(Gtk.Grid):
                     day=self.day_selector.get_value_as_int(),
                     hour=self.hour_selector.get_value_as_int(),
                     minute=self.minute_selector.get_value_as_int(),
+                    tzinfo=self.tz,
                 ),
             )
             self.emit('updated-date')
