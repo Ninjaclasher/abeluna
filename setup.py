@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='abeluna',
-    version='1.1.1',
+    version='1.1.2',
     entry_points={
         'gui_scripts': [
             'abeluna = abeluna.main:main',
@@ -29,5 +29,6 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 )
