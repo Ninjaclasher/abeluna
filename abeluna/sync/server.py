@@ -292,7 +292,7 @@ class SynchronizationServer:
 
     def refresh_calendars(self):
         new_calendars = {}
-        for uid, cal_dict in settings.CALENDARS.items():
+        for uid, cal_dict in settings.ordered_calendars.items():
             cal = Calendar.from_dict(cal_dict)
             new_calendars[uid] = cal
 

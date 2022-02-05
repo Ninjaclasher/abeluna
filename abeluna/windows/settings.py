@@ -310,9 +310,25 @@ class SettingsWindow(Gtk.Window):
 
         self.server_todo_store = Gtk.ListStore(str, str, str, str)
 
+        def on_server_order_changed(todo_tree_store, path=None, iter=None):
+            it = todo_tree_store.get_iter_first()
+            uids = []
+            while it is not None:
+                uid = todo_tree_store[it][3]
+                if uid is not None:
+                    uids.append(uid)
+                it = todo_tree_store.iter_next(it)
+
+            settings.set_calendar_order(uids)
+            settings.commit()
+            server.refresh_calendars()
+            self.parent.rebuild_calendarlist()
+
+        self.server_todo_store.connect('row-deleted', on_server_order_changed)
+
         def rebuild_server_todo_store():
             self.server_todo_store.clear()
-            for calendar in settings.CALENDARS.values():
+            for calendar in settings.ordered_calendars.values():
                 self.server_todo_store.append([
                     calendar['name'],
                     calendar['url'] or 'Local Calendar',
@@ -325,6 +341,7 @@ class SettingsWindow(Gtk.Window):
         self.server_view.set_hexpand(True)
         self.server_view.set_headers_clickable(False)
         self.server_view.set_search_column(0)
+        self.server_view.set_reorderable(True)
         for idx, name in enumerate(('Calendar Name', 'URL', 'Username')):
             self.server_view.append_column(Gtk.TreeViewColumn(name, Gtk.CellRendererText(), text=idx))
 

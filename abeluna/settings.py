@@ -51,6 +51,14 @@ class Settings:
             if section.startswith('calendar '):
                 calendar = dict(self.config[section])
                 self.add_or_update_calendar(calendar)
+        self.commit()
+
+    @property
+    def ordered_calendars(self):
+        _calendars = {}
+        for key, value in sorted(self.CALENDARS.items(), key=lambda x: int(x[1]['order'] or -1)):
+            _calendars[key] = value
+        return _calendars
 
     def commit(self):
         with self._lock:
@@ -67,6 +75,8 @@ class Settings:
     def add_or_update_calendar(self, data):
         data.setdefault('local_storage', self.TASK_STORAGE_LOCATION)
         with self._lock:
+            data.setdefault('order', str(len(self.CALENDARS) + 1))
+
             _old_uid = data.get('uid')
             hash_value = data.get('url', '').rstrip('/') or data['name']
             data['uid'] = _new_uid = hashlib.sha256(hash_value.encode()).hexdigest()
@@ -85,6 +95,13 @@ class Settings:
                 self.CALENDARS.pop(_old_uid)
 
             self.CALENDARS[_new_uid] = data
+
+    def set_calendar_order(self, ordered_uids):
+        with self._lock:
+            if set(ordered_uids) != set(self.CALENDARS.keys()):
+                return
+            for order, uid in enumerate(ordered_uids, 1):
+                self.CALENDARS[uid]['order'] = str(order)
 
     def delete_calendar(self, uid):
         with self._lock:
