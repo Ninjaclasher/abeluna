@@ -2,6 +2,7 @@ import configparser
 import hashlib
 import os
 import threading
+import keyring
 
 import pytz
 from gi.repository import GLib
@@ -50,6 +51,10 @@ class Settings:
         for section in self.config.sections():
             if section.startswith('calendar '):
                 calendar = dict(self.config[section])
+
+                if not 'password' in calendar:
+                    calendar['password'] = keyring.get_password("abeluna", calendar['uid'])
+
                 self.add_or_update_calendar(calendar)
         self.commit()
 
@@ -68,7 +73,10 @@ class Settings:
             for uid, calendar in self.CALENDARS.items():
                 section_name = 'calendar {}'.format(uid)
                 self.config.add_section(section_name)
-                self.config[section_name].update(calendar)
+                _calendar = calendar.copy()
+                del _calendar['password']
+                self.config[section_name].update(_calendar)
+                keyring.set_password("abeluna", uid, bytes(calendar['password'], 'utf-8'))
             with open(self.CONFIG_FILE, 'w') as f:
                 self.config.write(f)
 
