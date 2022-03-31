@@ -12,7 +12,7 @@ setup(
         ],
     },
     author='Evan Zhang',
-    install_requires=['pygobject', 'humanize', 'icalendar', 'caldav'],
+    install_requires=['pygobject', 'humanize', 'icalendar', 'caldav', 'keyring'],
     include_package_data=True,
     description='A simple GUI to-do/task manager with CalDAV support.',
     long_description=readme,
