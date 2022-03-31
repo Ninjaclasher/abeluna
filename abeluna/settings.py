@@ -2,8 +2,9 @@ import configparser
 import hashlib
 import os
 import threading
-import keyring
+import sys
 
+import keyring
 import pytz
 from gi.repository import GLib
 
@@ -52,8 +53,14 @@ class Settings:
             if section.startswith('calendar '):
                 calendar = dict(self.config[section])
 
-                if not 'password' in calendar:
-                    calendar['password'] = keyring.get_password("abeluna", calendar['uid'])
+                if 'password' not in calendar and calendar['url']:
+                    try:
+                        calendar['password'] = keyring.get_password("abeluna", calendar['uid'])
+                    except keyring.errors.KeyringLocked as e:
+                        print('Error: keyring locked. Unlock keyring to proceed')
+                        sys.exit(1)
+                    except (RuntimeError, keyring.errors.KeyringError) as e:
+                        print('Error getting password for calendar "{}" from keyring'.format(calendar['name']))
 
                 self.add_or_update_calendar(calendar)
         self.commit()
@@ -69,14 +76,27 @@ class Settings:
         with self._lock:
             for section in self.config.sections():
                 if section.startswith('calendar '):
+                    calendar = dict(self.config[section])
+                    if calendar['url'] and 'password' not in calendar:
+                        try:
+                            keyring.delete_password("abeluna", calendar['uid'])
+                        except (RuntimeError, keyring.errors.KeyringError) as e:
+                            pass
                     self.config.remove_section(section)
             for uid, calendar in self.CALENDARS.items():
                 section_name = 'calendar {}'.format(uid)
                 self.config.add_section(section_name)
                 _calendar = calendar.copy()
-                del _calendar['password']
+
+                if _calendar['url'] and _calendar['password']:
+                    try:
+                        keyring.set_password("abeluna", uid, bytes(_calendar['password'], 'utf-8'))
+                        del _calendar['password']
+                    except (RuntimeError, keyring.errors.KeyringError) as e:
+                        pass
+
                 self.config[section_name].update(_calendar)
-                keyring.set_password("abeluna", uid, bytes(calendar['password'], 'utf-8'))
+
             with open(self.CONFIG_FILE, 'w') as f:
                 self.config.write(f)
 

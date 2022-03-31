@@ -2,3 +2,4 @@ pygobject
 humanize
 icalendar
 caldav
+keyring
