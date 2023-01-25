@@ -147,6 +147,7 @@ class SynchronizationServer:
         elif local_copy_of_remote.to_ical() != remote_copy_of_remote.to_ical():
             # print(uid, 'was changed both locally and on remote. Merging...')
 
+            updated = False
             # User prioritizes server.
             for key, value in local_copy_of_local.items():
                 try:
@@ -165,16 +166,20 @@ class SynchronizationServer:
                 # Nothing changed server side, so use client value.
                 if (
                     settings.PRIORITIZE_ON_CONFLICT == 'SERVER' and
-                    local_copy_of_remote_value == remote_copy_of_remote_value
+                    local_copy_of_remote_value == remote_copy_of_remote_value and
+                    local_copy_of_local_value != remote_copy_of_remote_value
                 ):
+                    updated = True
                     remote_copy_of_remote[key] = value
                 # Something changed client side, so use client value.
                 elif (
                     settings.PRIORITIZE_ON_CONFLICT == 'CLIENT' and
-                    local_copy_of_remote_value != local_copy_of_local_value
+                    local_copy_of_local_value != local_copy_of_remote_value and
+                    local_copy_of_local_value != remote_copy_of_remote_value
                 ):
+                    updated = True
                     remote_copy_of_remote[key] = value
-            return True, remote_copy_of_remote
+            return updated, remote_copy_of_remote
         # How did we get here...
         else:
             assert False
